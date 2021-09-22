@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  api
+  namespace: default
+  labels:
+    app:  api
+spec:
+  selector:
+    matchLabels:
+      app: api
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  api
+    spec:
+      # initContainers:
+        # Init containers are exactly like regular containers, except:
+          # - Init containers always run to completion.
+          # - Each init container must complete successfully before the next one starts.
+      containers:
+      - name:  api-cont
+        image:  edangol/dotnet:1
+        env:
+            - name: ConnectionStrings__SqlConnection
+              value: "Server=dotnetapp-mssql-cluster-ip-service,1433;Database=products;User Id=SA;Password=sql@123U;"
+            - name: SA_PASSWORD
+              value: sql@123U
+        resources:
+          requests:
+            cpu: 512m
+            memory: 512Mi
+          limits:
+            cpu: 512m
+            memory: 512Mi
+        ports:
+        - containerPort: 80

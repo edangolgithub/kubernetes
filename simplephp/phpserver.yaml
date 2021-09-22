@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver
+  labels:
+    app: apache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apache
+  template:
+    metadata:
+      labels:
+        app: apache
+    spec:
+      containers:
+      - name: php-apache
+        image: edangol/php-apache:1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        # env:
+        #     - name: PMA_HOST
+        #       value: mysql
+        #     - name: PMA_PORT
+        #       value: "3306"
+        #     - name: MYSQL_ROOT_PASSWORD
+        #       value: password
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+  labels:
+    run: web-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    app: apache

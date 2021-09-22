@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  dotnetcontainer
+  namespace: default
+  labels:
+    app:  dotnetcontainer
+spec:
+  selector:
+    matchLabels:
+      app: dotnetcontainer
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  dotnetcontainer
+    spec:
+      # initContainers:
+        # Init containers are exactly like regular containers, except:
+          # - Init containers always run to completion.
+          # - Each init container must complete successfully before the next one starts.
+      containers:
+      - name:  dotnetcontainer
+        image:  edangol/dotnet:1
+        resources:
+          requests:
+            cpu: 512m
+            memory: 512Mi
+          limits:
+            cpu: 512m
+            memory: 512Mi
+        ports:
+        - containerPort: 80
+        
+       
+
+---
+
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: dotnet-service
+  namespace: default
+spec:
+  selector:
+    app: dotnetcontainer
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  type: LoadBalancer
+
+
+      

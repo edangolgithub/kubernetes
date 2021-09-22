@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  dotnetsql
+  namespace: default
+  labels:
+    app:  dotnetsql
+spec:
+  selector:
+    matchLabels:
+      app: dotnetsql
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  dotnetsql
+    spec:
+      # initContainers:
+        # Init containers are exactly like regular containers, except:
+          # - Init containers always run to completion.
+          # - Each init container must complete successfully before the next one starts.
+      containers:
+      - name:  dotnetsql
+        image:  edangol/dotnet:1
+        env:
+            - name: ConnectionStrings__SqlConnection
+              value: "Server=dotnetapp-mssql-cluster-ip-service,1433;Database=products;User Id=SA;Password=sql@123U;"
+            - name: SA_PASSWORD
+              value: sql@123U
+        resources:
+          requests:
+            cpu: 512m
+            memory: 512Mi
+          limits:
+            cpu: 512m
+            memory: 512Mi
+        ports:
+        - containerPort: 80
+        
+       
+
+---
+
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: dotnetsql-service
+  namespace: default
+spec:
+  selector:
+    app: dotnetsql
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  type: LoadBalancer
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: dotnetapp-mssql-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: dotnetapp-mssql
+  ports:
+    - port: 1433
+      targetPort: 1433
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dotnetapp-mssql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: dotnetapp-mssql
+  template:
+    metadata:
+      labels:
+        component: dotnetapp-mssql
+    spec:
+      volumes:
+        - name: dotnetapp-mssql-persistent-storage
+          persistentVolumeClaim:
+            claimName: dotnetapp-database-persistent-volume-claim
+      containers:
+        - name: dotnetapp-mssql
+          image: mcr.microsoft.com/mssql/server:2019-latest
+          ports:
+            - containerPort: 1433
+          volumeMounts:
+            - name: dotnetapp-mssql-persistent-storage
+              mountPath: /var/opt/sql
+              subPath: dotnetapp-mssql
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              value: sql@123U
+                
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dotnetapp-database-persistent-volume-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+      

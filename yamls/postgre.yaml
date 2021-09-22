@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:9.6.5
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: url_shortener_db
+        - name: POSTGRES_USER
+          value: user
+        - name: POSTGRES_PASSWORD
+          value: mysecretpassword
+          
+          
+# kubectl get po/postgres-5b99f887b7-zqxgm  -o go-template={{.metadata.labels}} map[app:postgres pod-template-hash:5b99f887b7]
+ #kubectl exec -it postgres-5b99f887b7-zqxgm bash root@postgres-1831265952-458wl:/# psql -U user -d url_shortener_db
