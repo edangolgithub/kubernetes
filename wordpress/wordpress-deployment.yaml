@@ -11,21 +11,9 @@ spec:
     app: wordpress
     tier: frontend
   type: LoadBalancer
+
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: wp-pv-claim
-  labels:
-    app: wordpress
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi
----
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: wordpress
@@ -45,17 +33,13 @@ spec:
         tier: frontend
     spec:
       containers:
-      - image: wordpress:5.4.1-apache
+      - image: wordpress:4.8-apache
         name: wordpress
-        
         env:
         - name: WORDPRESS_DB_HOST
           value: wordpress-mysql
         - name: WORDPRESS_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysqlpassword
-              key: mysql-password
+          value: password
         ports:
         - containerPort: 80
           name: wordpress

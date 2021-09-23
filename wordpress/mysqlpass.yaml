@@ -4,4 +4,4 @@ metadata:
   name: mysqlpassword
 type: Opaque
 data: 
-  mysql-password: kube
+  mysql-password: password@123U

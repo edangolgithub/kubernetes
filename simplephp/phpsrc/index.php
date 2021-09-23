@@ -1,6 +1,6 @@
 <?php
 echo "Inside K8s with MySQL <br>";
-$conn = new mysqli("mysql", "root", "password", "school");
+$conn = new mysqli("wordpress-mysql", "root", "password", "school");
 // Check connection
 if ($conn->connect_error) {
 	die("Connection failed: " . $conn->connect_error);
