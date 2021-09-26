@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  dockersqlserverdb-deployment
+  namespace: default
+  labels:
+    app:  dockersqlserverdb
+spec:
+  selector:
+    matchLabels:
+      app: dockersqlserverdb
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  dockersqlserverdb
+    spec:
+      volumes:
+        - name: dockersqlserverdb-persistent-storage
+          persistentVolumeClaim:
+            claimName: dockersqlserverdb-persistent-volume-claim
+      containers:
+        - name: dockersqlserverdb
+          image: mcr.microsoft.com/mssql/server:2019-latest
+          ports:
+            - containerPort: 1433
+          volumeMounts:
+            - name: dockersqlserverdb-persistent-storage
+              mountPath: /var/opt/sql
+              subPath: dockersqlserverdb
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              value: sql@123U
+          
+        
+      
+        
+       
+
+---
+
+
+
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: dockersqlserverdb-service
+spec:
+  type: ClusterIP
+  selector:
+    app:  dockersqlserverdb
+  ports:
+    - port: 1433
+      targetPort: 1433
+
+---
+
+
+
+      
